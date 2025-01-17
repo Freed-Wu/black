@@ -210,7 +210,11 @@ class Preview(Enum):
     docstring_check_for_newline = auto()
     remove_redundant_guard_parens = auto()
     parens_for_long_if_clauses_in_case_block = auto()
+    # NOTE: remove_lone_list_item_parens requires
+    # hug_parens_with_braces_and_square_brackets to remove parens in some cases
+    remove_lone_list_item_parens = auto()
     pep646_typed_star_arg_type_var_tuple = auto()
+    always_one_newline_after_import = auto()
 
 
 UNSTABLE_FEATURES: set[Preview] = {
@@ -290,6 +294,7 @@ class Mode:
             str(int(self.skip_source_first_line)),
             str(int(self.magic_trailing_comma)),
             str(int(self.preview)),
+            str(int(self.unstable)),
             features_and_magics,
         ]
         return ".".join(parts)

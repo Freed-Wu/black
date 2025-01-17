@@ -70,17 +70,17 @@ See also [the style documentation](labels/line-length).
 
 Python versions that should be supported by Black's output. You can run `black --help`
 and look for the `--target-version` option to see the full list of supported versions.
-You should include all versions that your code supports. If you support Python 3.8
-through 3.11, you should write:
+You should include all versions that your code supports. If you support Python 3.11
+through 3.13, you should write:
 
 ```console
-$ black -t py38 -t py39 -t py310 -t py311
+$ black -t py311 -t py312 -t py313
 ```
 
 In a [configuration file](#configuration-via-a-file), you can write:
 
 ```toml
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py311", "py312", "py313"]
 ```
 
 By default, Black will infer target versions from the project metadata in
@@ -269,8 +269,8 @@ configuration file for consistent results across environments.
 
 ```console
 $ black --version
-black, 24.8.0 (compiled: yes)
-$ black --required-version 24.8.0 -c "format = 'this'"
+black, 24.10.0 (compiled: yes)
+$ black --required-version 24.10.0 -c "format = 'this'"
 format = "this"
 $ black --required-version 31.5b2 -c "still = 'beta?!'"
 Oh no! 💥 💔 💥 The required version does not match the running version!
@@ -366,7 +366,7 @@ You can check the version of _Black_ you have installed using the `--version` fl
 
 ```console
 $ black --version
-black, 24.8.0
+black, 24.10.0
 ```
 
 #### `--config`
@@ -478,9 +478,10 @@ operating system, this configuration file should be stored as:
   `XDG_CONFIG_HOME` environment variable is not set)
 
 Note that these are paths to the TOML file itself (meaning that they shouldn't be named
-as `pyproject.toml`), not directories where you store the configuration. Here, `~`
-refers to the path to your home directory. On Windows, this will be something like
-`C:\\Users\UserName`.
+as `pyproject.toml`), not directories where you store the configuration (i.e.,
+`black`/`.black` is the file to create and add your configuration options to, in the
+`~/.config/` directory). Here, `~` refers to the path to your home directory. On
+Windows, this will be something like `C:\\Users\UserName`.
 
 You can also explicitly specify the path to a particular file that you want with
 `--config`. In this situation _Black_ will not look for any other file.

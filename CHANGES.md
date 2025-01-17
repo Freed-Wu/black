@@ -6,29 +6,26 @@
 
 <!-- Include any especially major or disruptive changes here -->
 
-- Black is now officially tested with Python 3.13. Note that Black does not yet provide
-  mypyc-compiled wheels for Python 3.13, so performance may be slower than on other
-  versions of Python. We will provide 3.13 mypyc-compiled wheels in a future release.
-  (#4436)
-- Black will issue an error when used with Python 3.12.5, due to an upstream memory
-  safety issue in Python 3.12.5 that can cause Black's AST safety checks to fail. Please
-  use Python 3.12.6 or Python 3.12.4 instead. (#4447)
-- Black no longer supports running with Python 3.8 (#4452)
-
 ### Stable style
 
 <!-- Changes that affect Black's stable style -->
 
-- Fix crashes involving comments in parenthesised return types or `X | Y` style unions.
-  (#4453)
-- Fix skipping Jupyter cells with unknown `%%` magic (#4462)
+- Fix formatting cells in IPython notebooks with magic methods and starting or trailing
+  empty lines (#4484)
+
+- Fix crash when formatting `with` statements containing tuple generators/unpacking
+  (#4538)
 
 ### Preview style
 
 <!-- Changes that affect Black's preview style -->
 
-- Fix type annotation spacing between * and more complex type variable tuple (i.e. `def
-  fn(*args: *tuple[*Ts, T]) -> None: pass`) (#4440)
+- Fix/remove string merging changing f-string quotes on f-strings with internal quotes
+  (#4498)
+- Remove parentheses around sole list items (#4312)
+- Collapse multiple empty lines after an import into one (#4489)
+- Prevent `string_processing` and `wrap_long_dict_values_in_parens` from removing
+  parentheses around long dictionary values (#4377)
 
 ### Configuration
 
@@ -38,8 +35,8 @@
 
 <!-- Changes to how Black is packaged, such as dependency requirements -->
 
-- Upgrade version of mypyc used to 1.11.2 (#4450)
-- `blackd` now requires a newer version of aiohttp. (#4451)
+- Store license identifier inside the `License-Expression` metadata field, see
+  [PEP 639](https://peps.python.org/pep-0639/). (#4479)
 
 ### Parser
 
@@ -49,12 +46,11 @@
 
 <!-- Changes that improve Black's performance. -->
 
+- Speed up the `is_fstring_start` function in Black's tokenizer (#4541)
+
 ### Output
 
 <!-- Changes to Black's terminal output and error messages -->
-
-- Added Python target version information on parse error (#4378)
-- Add information about Black version to internal error messages (#4457)
 
 ### _Blackd_
 
@@ -64,10 +60,49 @@
 
 <!-- For example, Docker, GitHub Actions, pre-commit, editors -->
 
+- If using stdin with `--stdin-filename` set to a force excluded path, stdin won't be
+  formatted. (#4539)
+
 ### Documentation
 
 <!-- Major changes to documentation and policies. Small docs changes
      don't need a changelog entry. -->
+
+## 24.10.0
+
+### Highlights
+
+- Black is now officially tested with Python 3.13 and provides Python 3.13
+  mypyc-compiled wheels. (#4436) (#4449)
+- Black will issue an error when used with Python 3.12.5, due to an upstream memory
+  safety issue in Python 3.12.5 that can cause Black's AST safety checks to fail. Please
+  use Python 3.12.6 or Python 3.12.4 instead. (#4447)
+- Black no longer supports running with Python 3.8 (#4452)
+
+### Stable style
+
+- Fix crashes involving comments in parenthesised return types or `X | Y` style unions.
+  (#4453)
+- Fix skipping Jupyter cells with unknown `%%` magic (#4462)
+
+### Preview style
+
+- Fix type annotation spacing between * and more complex type variable tuple (i.e. `def
+  fn(*args: *tuple[*Ts, T]) -> None: pass`) (#4440)
+
+### Caching
+
+- Fix bug where the cache was shared between runs with and without `--unstable` (#4466)
+
+### Packaging
+
+- Upgrade version of mypyc used to 1.12 beta (#4450) (#4449)
+- `blackd` now requires a newer version of aiohttp. (#4451)
+
+### Output
+
+- Added Python target version information on parse error (#4378)
+- Add information about Black version to internal error messages (#4457)
 
 ## 24.8.0
 

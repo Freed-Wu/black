@@ -10,26 +10,15 @@ import re
 import sys
 import textwrap
 import types
+from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager, redirect_stderr
-from dataclasses import replace
+from dataclasses import fields, replace
 from io import BytesIO
 from pathlib import Path, WindowsPath
 from platform import system
 from tempfile import TemporaryDirectory
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Optional, TypeVar, Union
 from unittest.mock import MagicMock, patch
 
 import click
@@ -107,11 +96,11 @@ class FakeContext(click.Context):
     """A fake click Context for when calling functions that need it."""
 
     def __init__(self) -> None:
-        self.default_map: Dict[str, Any] = {}
-        self.params: Dict[str, Any] = {}
+        self.default_map: dict[str, Any] = {}
+        self.params: dict[str, Any] = {}
         self.command: click.Command = black.main
         # Dummy root, since most of the tests don't care about it
-        self.obj: Dict[str, Any] = {"root": PROJECT_ROOT}
+        self.obj: dict[str, Any] = {"root": PROJECT_ROOT}
 
 
 class FakeParameter(click.Parameter):
@@ -129,7 +118,7 @@ class BlackRunner(CliRunner):
 
 
 def invokeBlack(
-    args: List[str], exit_code: int = 0, ignore_config: bool = True
+    args: list[str], exit_code: int = 0, ignore_config: bool = True
 ) -> None:
     runner = BlackRunner()
     if ignore_config:
@@ -933,7 +922,7 @@ class BlackTestCase(BlackBaseTestCase):
             "with ((a, ((b as c)))): pass", {Feature.PARENTHESIZED_CONTEXT_MANAGERS}
         )
 
-    def check_features_used(self, source: str, expected: Set[Feature]) -> None:
+    def check_features_used(self, source: str, expected: set[Feature]) -> None:
         node = black.lib2to3_parse(source)
         actual = black.get_features_used(node)
         msg = f"Expected {expected} but got {actual} for {source!r}"
@@ -1365,9 +1354,11 @@ class BlackTestCase(BlackBaseTestCase):
         ]
 
         def _new_wrapper(
-            output: io.StringIO, io_TextIOWrapper: Type[io.TextIOWrapper]
-        ) -> Callable[[Any, Any], io.TextIOWrapper]:
-            def get_output(*args: Any, **kwargs: Any) -> io.TextIOWrapper:
+            output: io.StringIO, io_TextIOWrapper: type[io.TextIOWrapper]
+        ) -> Callable[[Any, Any], Union[io.StringIO, io.TextIOWrapper]]:
+            def get_output(
+                *args: Any, **kwargs: Any
+            ) -> Union[io.StringIO, io.TextIOWrapper]:
                 if args == (sys.stdout.buffer,):
                     # It's `format_stdin_to_stdout()` calling `io.TextIOWrapper()`,
                     # return our mock object.
@@ -2347,6 +2338,36 @@ class TestCaching:
             two = black.Cache.read(short_mode)
             assert two.is_changed(path)
 
+    def test_cache_key(self) -> None:
+        # Test that all members of the mode enum affect the cache key.
+        for field in fields(Mode):
+            values: list[Any]
+            if field.name == "target_versions":
+                values = [
+                    {TargetVersion.PY312},
+                    {TargetVersion.PY313},
+                ]
+            elif field.name == "python_cell_magics":
+                values = [{"magic1"}, {"magic2"}]
+            elif field.name == "enabled_features":
+                # If you are looking to remove one of these features, just
+                # replace it with any other feature.
+                values = [
+                    {Preview.docstring_check_for_newline},
+                    {Preview.hex_codes_in_unicode_sequences},
+                ]
+            elif field.type is bool:
+                values = [True, False]
+            elif field.type is int:
+                values = [1, 2]
+            else:
+                raise AssertionError(
+                    f"Unhandled field type: {field.type} for field {field.name}"
+                )
+            modes = [replace(DEFAULT_MODE, **{field.name: value}) for value in values]
+            keys = [mode.get_cache_key() for mode in modes]
+            assert len(set(keys)) == len(modes)
+
 
 def assert_collected_sources(
     src: Sequence[Union[str, Path]],
@@ -2433,7 +2454,7 @@ class TestFileCollection:
         gitignore = PathSpec.from_lines(
             "gitwildmatch", ["exclude/", ".definitely_exclude"]
         )
-        sources: List[Path] = []
+        sources: list[Path] = []
         expected = [
             Path(path / "b/dont_exclude/a.py"),
             Path(path / "b/dont_exclude/a.pyi"),
@@ -2461,7 +2482,7 @@ class TestFileCollection:
         exclude = re.compile(r"")
         root_gitignore = black.files.get_gitignore(path)
         report = black.Report()
-        expected: List[Path] = [
+        expected: list[Path] = [
             Path(path / "x.py"),
             Path(path / "root/b.py"),
             Path(path / "root/c.py"),

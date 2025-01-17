@@ -1,7 +1,8 @@
 import itertools
 import math
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Iterator, Optional, Sequence, TypeVar, Union, cast
+from typing import Optional, TypeVar, Union, cast
 
 from black.brackets import COMMA_PRIORITY, DOT_PRIORITY, BracketTracker
 from black.mode import Mode, Preview
@@ -669,6 +670,15 @@ class EmptyLineTracker:
             return self._maybe_empty_lines_for_class_or_def(
                 current_line, before, user_had_newline
             )
+
+        if (
+            self.previous_line.is_import
+            and self.previous_line.depth == 0
+            and current_line.depth == 0
+            and not current_line.is_import
+            and Preview.always_one_newline_after_import in self.mode
+        ):
+            return 1, 0
 
         if (
             self.previous_line.is_import
